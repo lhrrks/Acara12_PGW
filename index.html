@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Peta GeoServer</title>
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin=""
-    >
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -46,7 +43,7 @@
             margin: 8px 0 4px;
         }
 
-        .map-legend section + section {
+        .map-legend section+section {
             border-top: 1px solid #ddd;
         }
 
@@ -66,30 +63,31 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Peta GeoServer</h1>
     <div id="map" aria-label="Peta GeoServer"></div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script
-        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-        crossorigin=""
-    ></script>
-    <script src="https://cdn.jsdelivr.net/gh/iamtekson/Leaflet-from-basic-to-advance@f4bb9638205959fa52a90e8eb18344cc7b38f390/geoserver/lib/L.Geoserver.js"></script>
+        src="https://cdn.jsdelivr.net/gh/iamtekson/Leaflet-from-basic-to-advance@f4bb9638205959fa52a90e8eb18344cc7b38f390/geoserver/lib/L.Geoserver.js"></script>
     <script>
         const config = {
             wmsUrl: 'http://localhost:8080/geoserver/wms',
             layers: {
                 Toponimi: 'PGW11_Luhur:Wonoso_Toponimi',
                 Jalan: 'PGW11_Luhur:Wonoso_Jalan',
-                Desa: 'PGW11_Luhur:Wonosobo_Desa'
-            }
+                Desa: 'PGW11_Luhur:Wonosobo_Desa',
+                'Hidran': 'PGW11_Luhur:hidran_kering'
+            },
         };
         const map = L.map('map');
         map.fitBounds([
-            [-7.39534712, 109.8871994],
-            [-7.32183695, 109.97121429]
-        ], { padding: [20, 20] });
+            [-7.813141111, 110.3721586],
+            [-7.7123, 110.37725]
+        ], { padding: [20, 20], maxZoom: 17 }
+    );
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -98,8 +96,8 @@
 
         const overlays = {};
         const layerEntries = Object.entries(config.layers);
-        const layerPanes = ['toponimiPane', 'jalanPane', 'desaPane'];
-        const layerZIndices = [430, 420, 410];
+        const layerPanes = ['toponimiPane', 'jalanPane', 'desaPane', 'hidranKeringPane'];
+        const layerZIndices = [430, 420, 410, 440];
         layerEntries.forEach(([label, layerName], index) => {
             const paneName = layerPanes[index];
             map.createPane(paneName).style.zIndex = layerZIndices[index];
@@ -115,7 +113,13 @@
             overlays[label] = layer;
         });
 
-        L.control.layers(null, overlays).addTo(map);
+        L.control.layers(null, overlays, { collapsed: false }).addTo(map);
+
+        map.on('overlayadd', (event) => {
+            if (event.name === 'Hidran Kering') {
+                map.fitBounds(config.hidranBounds, { padding: [20, 20] });
+            }
+        });
 
         const legendControl = L.control({ position: 'bottomleft' });
         legendControl.onAdd = function () {
@@ -166,4 +170,5 @@
         legendControl.addTo(map);
     </script>
 </body>
+
 </html>
